@@ -10,32 +10,407 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="style.css">
-
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <style>
+    :root {
+      --bg1: #f7f8fc;
+      --bg2: #eef2ff;
+      --card: rgba(255, 255, 255, 0.76);
+      --border: rgba(255, 255, 255, 0.8);
+      --text: #111827;
+      --muted: #6b7280;
+      --blue: #0a84ff;
+      --blue2: #0066d6;
+      --shadow: 0 24px 70px rgba(31, 41, 55, 0.12);
+      --radius: 30px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.92), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(160,180,255,.18), transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255,255,255,.35), transparent 22%),
+        radial-gradient(circle at 82% 12%, rgba(255,255,255,.22), transparent 18%),
+        radial-gradient(circle at 72% 82%, rgba(255,255,255,.18), transparent 20%);
+      filter: blur(12px);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      position: relative;
+    }
+
+    .card {
+      width: min(860px, 100%);
+      border-radius: var(--radius);
+      background: var(--card);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(22px);
+      -webkit-backdrop-filter: blur(22px);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255,255,255,.38), transparent 18%);
+    }
+
+    .floating {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .orb {
+      position: absolute;
+      border-radius: 999px;
+      background: rgba(255,255,255,.68);
+      filter: blur(2px);
+      opacity: .5;
+      animation: drift 14s ease-in-out infinite alternate;
+    }
+
+    .orb.one { width: 120px; height: 120px; top: -28px; right: -22px; }
+    .orb.two { width: 88px; height: 88px; bottom: 34px; left: -16px; animation-duration: 18s; }
+    .orb.three { width: 60px; height: 60px; top: 124px; left: 10%; animation-duration: 16s; }
+
+    @keyframes drift {
+      from { transform: translate3d(0,0,0) scale(1); }
+      to   { transform: translate3d(10px,16px,0) scale(1.05); }
+    }
+
+    .view {
+      position: relative;
+      z-index: 1;
+      padding: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.72);
+      border: 1px solid rgba(255,255,255,.9);
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    h1, h2, p { margin: 0; }
+
+    h1 {
+      font-size: clamp(30px, 4.8vw, 48px);
+      line-height: 1.06;
+      letter-spacing: -0.04em;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.9;
+      margin-bottom: 18px;
+      max-width: 52ch;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .cat-box {
+      border-radius: 26px;
+      overflow: hidden;
+      background: rgba(255,255,255,.8);
+      border: 1px solid rgba(255,255,255,.9);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+    }
+
+    .cat-box img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .caption {
+      padding: 14px 16px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 20px;
+      max-width: 520px;
+    }
+
+    button {
+      appearance: none;
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, filter .18s ease;
+      will-change: transform;
+    }
+
+    .btn {
+      min-height: 56px;
+      border-radius: 999px;
+      padding: 0 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .btn:active { transform: scale(.98); }
+
+    .btn-yes {
+      background: linear-gradient(180deg, var(--blue), var(--blue2));
+      color: #fff;
+      box-shadow: 0 12px 24px rgba(10, 132, 255, .26);
+    }
+
+    .btn-yes:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 15px 30px rgba(10, 132, 255, .32);
+    }
+
+    .btn-no {
+      background: rgba(255,255,255,.9);
+      color: #e11d48;
+      border: 1px solid rgba(225,29,72,.14);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
+      position: relative;
+      transform-origin: center center;
+    }
+
+    .btn-no:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-no.shake {
+      animation: shake .34s ease-in-out;
+    }
+
+    @keyframes shake {
+      0% { transform: translateX(0); }
+      20% { transform: translateX(-4px) rotate(-1deg); }
+      40% { transform: translateX(4px) rotate(1deg); }
+      60% { transform: translateX(-3px) rotate(-1deg); }
+      80% { transform: translateX(3px) rotate(1deg); }
+      100% { transform: translateX(0); }
+    }
+
+    .hint {
+      margin-top: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
+    .meter {
+      margin-top: 14px;
+      width: min(520px, 100%);
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.65);
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.75);
+      box-shadow: inset 0 1px 2px rgba(0,0,0,.04);
+    }
+
+    .meter > span {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ff9f0a, #ff375f, #0a84ff);
+      transition: width .24s ease;
+    }
+
+    .footer-note {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .hidden { display: none !important; }
+
+    .success {
+      text-align: center;
+      padding: 32px 28px 30px;
+    }
+
+    .success-badge {
+      width: 76px;
+      height: 76px;
+      margin: 0 auto 18px;
+      border-radius: 24px;
+      background: linear-gradient(180deg, rgba(10,132,255,.18), rgba(10,132,255,.08));
+      display: grid;
+      place-items: center;
+      color: var(--blue2);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+    }
+
+    .success h2 {
+      font-size: clamp(26px, 4vw, 40px);
+      letter-spacing: -0.04em;
+      margin-bottom: 8px;
+    }
+
+    .success p {
+      color: var(--muted);
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .video-wrap {
+      margin: 0 auto 18px;
+      width: min(100%, 440px);
+      border-radius: 26px;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.92);
+      background: rgba(255,255,255,.78);
+      box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
+    }
+
+    video {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .restart {
+      background: rgba(255,255,255,.9);
+      color: var(--text);
+      border: 1px solid rgba(17,24,39,.08);
+      box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
+    }
+
+    .restart:hover {
+      transform: translateY(-1px);
+    }
+
+    .toast {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 50;
+      background: rgba(17,24,39,.88);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 999px;
+      font-size: 14px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.18);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      transition: opacity .22s ease, transform .22s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .floating-hearts {
+      position: absolute;
+      inset: 0;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .heart {
+      position: absolute;
+      font-size: 18px;
+      opacity: 0;
+      animation: rise 5s linear infinite;
+      filter: drop-shadow(0 8px 14px rgba(10,132,255,.12));
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(18px) scale(.8); opacity: 0; }
+      12% { opacity: .55; }
+      100% { transform: translateY(-120px) scale(1.2); opacity: 0; }
+    }
+
+    @media (min-width: 900px) {
+      .view { padding: 34px; }
+      .grid { grid-template-columns: 1.05fr .95fr; }
+      .caption { text-align: right; }
+      .success { padding: 36px 34px 32px; }
+    }
+  </style>
 </head>
 <body>
   <div class="app">
-    <div class="card" id="proposalCard">
+    <div class="card">
+      <div class="floating-hearts" id="floatingHearts" aria-hidden="true"></div>
       <div class="floating">
         <span class="orb one"></span>
         <span class="orb two"></span>
         <span class="orb three"></span>
       </div>
 
-      <div class="card-inner" id="proposalView">
+      <section class="view" id="proposalView">
         <div class="eyebrow">
           <i data-lucide="sparkles" width="16" height="16"></i>
           Special Question
         </div>
 
-        <div class="hero">
+        <div class="grid">
           <div>
-            <h1>خديجة تقبلي تتزوجي بيا؟ 💍</h1>
-            <p class="subtitle">
-              طلبي الوحيد و هاذي بلاصتو و معاك نتي
-            </p>
+            <h1>خديجة تقبلي تتزوجي بيا؟</h1>
+            <p class="subtitle">طلبي الوحيد و هاذي بلاصتو و معاك نتي</p>
 
             <div class="actions">
               <button class="btn btn-yes" id="yesBtn">
@@ -45,14 +420,20 @@
 
               <button class="btn btn-no" id="noBtn">
                 <i data-lucide="x" width="18" height="18"></i>
-                <span>لا</span>
+                <span id="noLabel">لا</span>
               </button>
             </div>
 
             <div class="hint" id="hintLine">
               <i data-lucide="mouse-pointer-2" width="16" height="16"></i>
-              اضغطي على الخيار المناسب
+              زر لا يبقى في مكانه، لكن كل ضغطة عليه تخلّيه يهتز أكثر
             </div>
+
+            <div class="meter" aria-hidden="true">
+              <span id="meterFill"></span>
+            </div>
+
+            <div class="footer-note" id="footerNote">عدد محاولات الرفض: 0</div>
           </div>
 
           <div class="cat-box">
@@ -61,12 +442,12 @@
               alt="Cat asking nicely"
               id="catImage"
             />
-            <div class="caption">راني نبكي</div>
+            <div class="caption" id="catCaption">راني نبكي</div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="card-inner success hidden" id="successView">
+      <section class="view success hidden" id="successView">
         <div class="success-badge">
           <i data-lucide="party-popper" width="34" height="34"></i>
         </div>
@@ -84,312 +465,187 @@
           <i data-lucide="rotate-ccw" width="18" height="18"></i>
           <span>رجوع</span>
         </button>
-      </div>
+      </section>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <div class="toast" id="toast" aria-live="polite" aria-atomic="true"></div>
 
-  <script src="script.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      lucide.createIcons();
+
+      const proposalView = document.getElementById("proposalView");
+      const successView = document.getElementById("successView");
+      const yesBtn = document.getElementById("yesBtn");
+      const noBtn = document.getElementById("noBtn");
+      const noLabel = document.getElementById("noLabel");
+      const restartBtn = document.getElementById("restartBtn");
+      const toast = document.getElementById("toast");
+      const meterFill = document.getElementById("meterFill");
+      const footerNote = document.getElementById("footerNote");
+      const catCaption = document.getElementById("catCaption");
+      const floatingHearts = document.getElementById("floatingHearts");
+      const danceVideo = document.getElementById("danceVideo");
+
+      let noClicks = 0;
+
+      const noMessages = [
+        "متأكدة؟",
+        "خممي مليح",
+        "آخر فرصة",
+        "مرة وحدة",
+        "مزالك باغية تقولي لا؟",
+        "اخر فرصة",
+        "مازال؟"
+      ];
+
+      const catMessages = [
+        "راني نبكي",
+        "مازال عندك وقت",
+        "خليه يفرح",
+        "حاسة بالندم؟",
+        "ديريها زينة"
+      ];
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(showToast._timer);
+        showToast._timer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 1200);
+      }
+
+      function updateNoState() {
+        const maxClicks = 8;
+        const progress = Math.min(noClicks / maxClicks, 1);
+
+        footerNote.textContent = `عدد محاولات الرفض: ${noClicks}`;
+        meterFill.style.width = `${progress * 100}%`;
+
+        const msg = noMessages[Math.min(noClicks - 1, noMessages.length - 1)];
+        if (noClicks > 0) showToast(msg);
+
+        const catMsg = catMessages[Math.min(noClicks - 1, catMessages.length - 1)];
+        if (noClicks > 0) catCaption.textContent = catMsg;
+
+        if (noClicks <= 2) {
+          noLabel.textContent = "لا";
+        } else if (noClicks <= 4) {
+          noLabel.textContent = "جدًا؟";
+        } else if (noClicks <= 6) {
+          noLabel.textContent = "مو معقول";
+        } else {
+          noLabel.textContent = "خلص";
+        }
+
+        noBtn.classList.remove("shake");
+        void noBtn.offsetWidth;
+        noBtn.classList.add("shake");
+
+        const scale = 1 + Math.min(noClicks * 0.015, 0.08);
+        noBtn.style.transform = `scale(${scale})`;
+
+        yesBtn.style.transform = `translateY(-1px) scale(${1 + Math.min(noClicks * 0.02, 0.12)})`;
+        yesBtn.style.boxShadow = `0 12px 24px rgba(10, 132, 255, ${0.26 + Math.min(noClicks * 0.015, 0.12)})`;
+
+        if (noClicks >= 5) {
+          noBtn.style.filter = "saturate(1.15)";
+        }
+
+        if (noClicks >= 8) {
+          noBtn.innerHTML = '<i data-lucide="x" width="18" height="18"></i><span>آخر لا</span>';
+          lucide.createIcons();
+        }
+      }
+
+      function launchConfetti() {
+        const duration = 1800;
+        const end = Date.now() + duration;
+
+        (function frame() {
+          confetti({
+            particleCount: 3,
+            angle: 60,
+            spread: 55,
+            startVelocity: 38,
+            origin: { x: 0, y: 0.7 }
+          });
+
+          confetti({
+            particleCount: 3,
+            angle: 120,
+            spread: 55,
+            startVelocity: 38,
+            origin: { x: 1, y: 0.7 }
+          });
+
+          if (Date.now() < end) requestAnimationFrame(frame);
+        })();
+      }
+
+      function spawnHearts() {
+        floatingHearts.innerHTML = "";
+        const total = 14;
+        for (let i = 0; i < total; i++) {
+          const heart = document.createElement("span");
+          heart.className = "heart";
+          heart.textContent = "♥";
+          heart.style.left = `${Math.random() * 100}%`;
+          heart.style.bottom = `${Math.random() * 18}%`;
+          heart.style.animationDelay = `${Math.random() * 2.8}s`;
+          heart.style.animationDuration = `${4 + Math.random() * 2.5}s`;
+          heart.style.fontSize = `${14 + Math.random() * 14}px`;
+          heart.style.color = ["#0a84ff", "#ff3b30", "#ff9f0a", "#ff375f"][Math.floor(Math.random() * 4)];
+          floatingHearts.appendChild(heart);
+        }
+      }
+
+      function toSuccess() {
+        proposalView.classList.add("hidden");
+        successView.classList.remove("hidden");
+        launchConfetti();
+        spawnHearts();
+        lucide.createIcons();
+        if (danceVideo) {
+          danceVideo.play().catch(() => {});
+        }
+      }
+
+      function resetView() {
+        successView.classList.add("hidden");
+        proposalView.classList.remove("hidden");
+
+        noClicks = 0;
+        noLabel.textContent = "لا";
+        catCaption.textContent = "راني نبكي";
+        footerNote.textContent = "عدد محاولات الرفض: 0";
+        meterFill.style.width = "0%";
+
+        noBtn.classList.remove("shake");
+        noBtn.style.transform = "";
+        noBtn.style.filter = "";
+        noBtn.innerHTML = '<i data-lucide="x" width="18" height="18"></i><span id="noLabel">لا</span>';
+
+        yesBtn.style.transform = "";
+        yesBtn.style.boxShadow = "";
+
+        lucide.createIcons();
+      }
+
+      yesBtn.addEventListener("click", toSuccess);
+
+      noBtn.addEventListener("click", () => {
+        noClicks += 1;
+        updateNoState();
+      });
+
+      restartBtn.addEventListener("click", resetView);
+    });
+  </script>
 </body>
-</html>        radial-gradient(circle at top left, rgba(255,255,255,.9), transparent 35%),
-        radial-gradient(circle at bottom right, rgba(160, 180, 255, .18), transparent 32%),
-        linear-gradient(135deg, var(--bg1), var(--bg2));
-      color: var(--text);
-      overflow-x: hidden;
-    }
-
-    body::before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,.35), transparent 25%),
-        radial-gradient(circle at 80% 10%, rgba(255,255,255,.2), transparent 20%),
-        radial-gradient(circle at 70% 80%, rgba(255,255,255,.18), transparent 22%);
-      pointer-events: none;
-      filter: blur(10px);
-    }
-
-    .app {
-      position: relative;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      padding: 24px;
-    }
-
-    .card {
-      width: min(720px, 100%);
-      background: var(--card);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-radius: var(--radius);
-      overflow: hidden;
-      position: relative;
-    }
-
-    .card-inner {
-      padding: 28px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.7);
-      border: 1px solid rgba(255,255,255,.85);
-      color: var(--muted);
-      font-size: 14px;
-      font-weight: 600;
-      margin-bottom: 20px;
-    }
-
-    h1, h2, p {
-      margin: 0;
-    }
-
-    h1 {
-      font-size: clamp(28px, 4.5vw, 44px);
-      line-height: 1.08;
-      letter-spacing: -0.04em;
-      margin-bottom: 10px;
-    }
-
-    .subtitle {
-      font-size: 16px;
-      line-height: 1.8;
-      color: var(--muted);
-      margin-bottom: 22px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 18px;
-      align-items: center;
-    }
-
-    .cat-box {
-      border-radius: 24px;
-      overflow: hidden;
-      background: rgba(255,255,255,.75);
-      border: 1px solid rgba(255,255,255,.9);
-      box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
-    }
-
-    .cat-box img {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .caption {
-      padding: 14px 16px 16px;
-      font-size: 14px;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .actions {
-      display: flex;
-      gap: 12px;
-      flex-wrap: wrap;
-      margin-top: 22px;
-    }
-
-    button {
-      appearance: none;
-      border: 0;
-      cursor: pointer;
-      font: inherit;
-      transition: transform .18s ease, box-shadow .18s ease, opacity .18s ease, background .18s ease;
-      will-change: transform;
-      user-select: none;
-    }
-
-    .btn {
-      min-height: 54px;
-      padding: 0 20px;
-      border-radius: 999px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      font-size: 16px;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-
-    .btn:active { transform: scale(.98); }
-
-    .btn-yes {
-      background: linear-gradient(180deg, #0a84ff, #0066d6);
-      color: white;
-      box-shadow: 0 10px 24px rgba(10, 132, 255, .28);
-      flex: 1 1 220px;
-    }
-
-    .btn-yes:hover {
-      box-shadow: 0 14px 28px rgba(10, 132, 255, .34);
-      transform: translateY(-1px);
-    }
-
-    .btn-no {
-      background: rgba(255,255,255,.82);
-      color: #e11d48;
-      border: 1px solid rgba(225, 29, 72, .15);
-      box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
-      flex: 1 1 220px;
-      position: relative;
-      transform-origin: center center;
-    }
-
-    .btn-no:hover {
-      transform: translateY(-1px) scale(1.01);
-    }
-
-    .hint {
-      margin-top: 14px;
-      font-size: 13px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .hidden { display: none !important; }
-
-    .success {
-      text-align: center;
-      padding: 30px 28px 28px;
-    }
-
-    .success-badge {
-      width: 72px;
-      height: 72px;
-      margin: 0 auto 18px;
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(10,132,255,.15), rgba(10,132,255,.08));
-      display: grid;
-      place-items: center;
-      color: var(--yesDark);
-      box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
-    }
-
-    .success h2 {
-      font-size: clamp(26px, 4vw, 40px);
-      letter-spacing: -0.04em;
-      margin-bottom: 8px;
-    }
-
-    .success p {
-      color: var(--muted);
-      line-height: 1.8;
-      margin-bottom: 22px;
-    }
-
-    .video-wrap {
-      margin: 0 auto 20px;
-      width: min(100%, 420px);
-      border-radius: 24px;
-      overflow: hidden;
-      border: 1px solid rgba(255,255,255,.9);
-      background: rgba(255,255,255,.7);
-      box-shadow: 0 12px 30px rgba(15, 23, 42, .08);
-    }
-
-    video {
-      display: block;
-      width: 100%;
-      height: auto;
-    }
-
-    .restart {
-      background: rgba(255,255,255,.88);
-      color: var(--text);
-      border: 1px solid rgba(17,24,39,.08);
-      box-shadow: 0 10px 24px rgba(15, 23, 42, .08);
-    }
-
-    .toast {
-      position: fixed;
-      top: 18px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(17, 24, 39, .86);
-      color: white;
-      padding: 12px 16px;
-      border-radius: 999px;
-      font-size: 14px;
-      box-shadow: 0 18px 40px rgba(0,0,0,.18);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity .25s ease, transform .25s ease;
-      z-index: 50;
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-    }
-
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(4px);
-    }
-
-    .floating {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      overflow: hidden;
-    }
-
-    .orb {
-      position: absolute;
-      border-radius: 999px;
-      filter: blur(2px);
-      opacity: .45;
-      animation: drift 14s ease-in-out infinite alternate;
-      background: rgba(255,255,255,.75);
-    }
-
-    .orb.one { width: 120px; height: 120px; top: -30px; right: -20px; }
-    .orb.two { width: 90px; height: 90px; bottom: 30px; left: -15px; animation-duration: 18s; }
-    .orb.three { width: 60px; height: 60px; top: 120px; left: 10%; animation-duration: 16s; }
-
-    @keyframes drift {
-      from { transform: translateY(0px) translateX(0px) scale(1); }
-      to { transform: translateY(16px) translateX(10px) scale(1.04); }
-    }
-
-    @media (min-width: 860px) {
-      .card-inner { padding: 34px; }
-      .hero {
-        grid-template-columns: 1.1fr .95fr;
-      }
-      .caption {
-        text-align: right;
-      }
-      .success {
-        padding: 34px 34px 30px;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="app">
-    <div class="card" id="proposalCard">
-      <div class="floating">
-        <span class="orb one"></span>
-        <span class="orb two"></span>
-        <span class="orb three"></span>
-      </div>
-
-      <div class="card-inner" id="proposalView">
-        <div class="eyebrow">
+</html><div class="eyebrow">
           <i data-lucide="sparkles" width="16" height="16"></i>
           Special Question
         </div>
