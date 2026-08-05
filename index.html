@@ -10,31 +10,89 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <link rel="stylesheet" href="style.css">
+
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+</head>
+<body>
+  <div class="app">
+    <div class="card" id="proposalCard">
+      <div class="floating">
+        <span class="orb one"></span>
+        <span class="orb two"></span>
+        <span class="orb three"></span>
+      </div>
 
-  <style>
-    :root {
-      --bg1: #f7f8fc;
-      --bg2: #eef2ff;
-      --card: rgba(255, 255, 255, 0.72);
-      --border: rgba(255, 255, 255, 0.7);
-      --text: #111827;
-      --muted: #6b7280;
-      --yes: #0a84ff;
-      --yesDark: #0066d6;
-      --no: #ff3b30;
-      --shadow: 0 20px 60px rgba(31, 41, 55, 0.12);
-      --radius: 28px;
-    }
+      <div class="card-inner" id="proposalView">
+        <div class="eyebrow">
+          <i data-lucide="sparkles" width="16" height="16"></i>
+          Special Question
+        </div>
 
-    * { box-sizing: border-box; }
-    html, body {
-      margin: 0;
-      min-height: 100%;
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
-      background:
-        radial-gradient(circle at top left, rgba(255,255,255,.9), transparent 35%),
+        <div class="hero">
+          <div>
+            <h1>خديجة تقبلي تتزوجي بيا؟ 💍</h1>
+            <p class="subtitle">
+              طلبي الوحيد و هاذي بلاصتو و معاك نتي
+            </p>
+
+            <div class="actions">
+              <button class="btn btn-yes" id="yesBtn">
+                <i data-lucide="heart" width="18" height="18"></i>
+                <span>ايه نقبل</span>
+              </button>
+
+              <button class="btn btn-no" id="noBtn">
+                <i data-lucide="x" width="18" height="18"></i>
+                <span>لا</span>
+              </button>
+            </div>
+
+            <div class="hint" id="hintLine">
+              <i data-lucide="mouse-pointer-2" width="16" height="16"></i>
+              اضغطي على الخيار المناسب
+            </div>
+          </div>
+
+          <div class="cat-box">
+            <img
+              src="https://ik.imagekit.io/q2et3cl8l/cat.jpg"
+              alt="Cat asking nicely"
+              id="catImage"
+            />
+            <div class="caption">راني نبكي</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card-inner success hidden" id="successView">
+        <div class="success-badge">
+          <i data-lucide="party-popper" width="34" height="34"></i>
+        </div>
+
+        <h2>ويااااا قبلت</h2>
+        <p>واااااااععع مبروووووك</p>
+
+        <div class="video-wrap">
+          <video id="danceVideo" autoplay loop muted playsinline>
+            <source src="https://ik.imagekit.io/q2et3cl8l/dance.mp4" type="video/mp4" />
+          </video>
+        </div>
+
+        <button class="btn restart" id="restartBtn">
+          <i data-lucide="rotate-ccw" width="18" height="18"></i>
+          <span>رجوع</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>        radial-gradient(circle at top left, rgba(255,255,255,.9), transparent 35%),
         radial-gradient(circle at bottom right, rgba(160, 180, 255, .18), transparent 32%),
         linear-gradient(135deg, var(--bg1), var(--bg2));
       color: var(--text);
